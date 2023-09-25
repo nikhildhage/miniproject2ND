@@ -36,37 +36,25 @@ from pathlib import Path
 
 # Takes an api key and gets inflation data for a specific country
 def getInflationData(country):
-    Countries = ["United States", "AAPL", "GME", "SONY", "META"]
-    data = pd.read_json("GlobalDatasetofInflation.json", orient="Country")
+    df = pd.read_json("GlobalDatasetofInflation.json", orient="Country")
+    data = df[["1980",  "2000"]]
     print(data.head(5))
+    return data
 
 
-def showGraphs():
-    # stocks list
-    Countries = ["MSFT", "AAPL", "GME", "SONY", "META"]
+def showGraphs(dataFrame):
+    Countries = ["United States", "AAPL", "GME", "SONY", "META"]
 
-    # Lop through all countries in Countries Array
-    for country in Countries:
-        # empty numpy array created from returned closing price list
-        countryInflation = np.array(getInflationData(country))
+    dataFrame.abs().plot.area()
 
-    # Plot the graphs
-    plt.plot(countryInflation)
+    # Set axis
+    plt.title("Inflation Rates for Countries" + " ")
+    plt.xlabel("Years")
+    plt.ylabel("Countries")
 
-    # set x and y axis min and max
-    plt.axis([1, 10])
 
-    # Setup graph title and labels
-    plt.title("Inflation for" + " " + "country")
-    plt.xlabel("Countries")
-    plt.ylabel("Data")
-
-    # save Graphs to charts folder
-    saveFile = '''"charts/" + "Country + ".png"'''
-    plt.savefig(saveFile)
-
-    # Show graphs
     plt.show()
 
 
-getInflationData("United States")
+showGraphs(getInflationData("United States"))
+
