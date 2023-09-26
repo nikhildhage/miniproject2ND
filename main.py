@@ -35,26 +35,47 @@ from pathlib import Path
 
 
 # Takes an api key and gets inflation data for a specific country
-def getInflationData(country):
-    df = pd.read_json("GlobalDatasetofInflation.json", orient="Country")
-    data = df[["1980",  "2000"]]
-    print(data.head(5))
+def getInflationData():
+    df = pd.read_json("GlobalDatasetofInflation.json")
+    data = df[["1980", "2000"]]
+    print(data.head(5).describe())
     return data
 
 
-def showGraphs(dataFrame):
-    Countries = ["United States", "AAPL", "GME", "SONY", "META"]
-
+def showGraph(dataFrame):
     dataFrame.abs().plot.area()
 
     # Set axis
-    plt.title("Inflation Rates for Countries" + " ")
     plt.xlabel("Years")
     plt.ylabel("Countries")
-
-
     plt.show()
 
 
-showGraphs(getInflationData("United States"))
+def displayAllGraphs(dataFrame):
+    try:
+        Path('charts').mkdir()
+    except FileExistsError:
+        print("Error: Could not create charts folder")
 
+    Countries = ["United States", "United Kingdom", "Switzerland", "China", "Japan"]
+    for Country in Countries:
+        dataFrame.abs().plot.area()
+
+        # Get min and max for inflation data
+        inflation_min = 0
+        inflation_max = 300
+
+        # Set axis
+        plt.axis([1, 10, inflation_min, inflation_max])
+        plt.xlabel("Years")
+        plt.ylabel("Inflation Rate")
+        plt.title("Inflation Rates for" + " " + Country)
+
+        # save Graphs to charts folder
+        saveFile = "charts/" + Country + ".png"
+        plt.savefig(saveFile)
+
+        plt.show()
+
+
+displayAllGraphs(getInflationData())
