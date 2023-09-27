@@ -32,50 +32,44 @@ import pandas as pd
 import pprint
 import numpy as np
 from pathlib import Path
+import math
 
 
 # Takes an api key and gets inflation data for a specific country
-def getInflationData():
+def getInflationData(countries):
     df = pd.read_json("GlobalDatasetofInflation.json")
-    data = df[["1980", "2000"]]
-    print(data.head(5).describe())
+    filtered_df = df[df['Series Name'] == 'Headline Consumer Price Inflation']
+    data = filtered_df.set_index("Country").loc[countries, ["1970", "1971", "1972", "1973", "1974", "1975"]]
+    print(data)
     return data
 
 
-def showGraph(dataFrame):
-    dataFrame.abs().plot.area()
-
-    # Set axis
-    plt.xlabel("Years")
-    plt.ylabel("Countries")
-    plt.show()
-
-
 def displayAllGraphs(dataFrame):
+    if dataFrame is None:
+        return
+
     try:
         Path('charts').mkdir()
     except FileExistsError:
         print("Error: Could not create charts folder")
 
-    Countries = ["United States", "United Kingdom", "Switzerland", "China", "Japan"]
-    for Country in Countries:
-        dataFrame.abs().plot.area()
+    global_min = math.floor(dataFrame.values.min())
+    global_max = math.ceil(dataFrame.values.max())
 
-        # Get min and max for inflation data
-        inflation_min = 0
-        inflation_max = 300
+    for Country, values in dataFrame.iterrows():
+        values.plot(kind="bar", figsize=(10, 6), rot=0)
 
-        # Set axis
-        plt.axis([1, 10, inflation_min, inflation_max])
         plt.xlabel("Years")
         plt.ylabel("Inflation Rate")
         plt.title("Inflation Rates for" + " " + Country)
 
-        # save Graphs to charts folder
+        plt.ylim(global_min, global_max)
+
+        # Save Graphs to charts folder
         saveFile = "charts/" + Country + ".png"
         plt.savefig(saveFile)
 
         plt.show()
 
 
-displayAllGraphs(getInflationData())
+displayAllGraphs(getInflationData(["United States", "United Kingdom", "Switzerland", "Germany", "Japan"]))
